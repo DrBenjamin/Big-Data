@@ -59,5 +59,3 @@ spark_install("3.5")
 
 
 Installing spark only needs to be done once.
-
-
