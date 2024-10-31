@@ -1,11 +1,11 @@
 ----------------------------------------------------------------
-Sun Oct 27 15:10:11 CET 2024:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0192-ce50-23d4-00000234c258 
-on database directory memory:/Users/ben/Library/Mobile Documents/com~apple~CloudDocs/R/Big Data/databaseName=metastore_db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@63c12fb0 
+Thu Oct 31 07:40:05 CET 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0192-e14d-7d5c-0000052db280 
+on database directory memory:/Users/ben/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Documents/Courses/Big data analytics/Projects/Big Data/databaseName=metastore_db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@63c12fb0 
 Loaded from file:/Users/ben/spark/spark-3.5.0-bin-hadoop3/jars/derby-10.14.2.0.jar
 java.vendor=Eclipse Adoptium
 java.runtime.version=21.0.2+13-LTS
-user.dir=/Users/ben/Library/Mobile Documents/com~apple~CloudDocs/R/Big Data
+user.dir=/Users/ben/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Documents/Courses/Big data analytics/Projects/Big Data
 os.name=Mac OS X
 os.arch=aarch64
 os.version=15.1
