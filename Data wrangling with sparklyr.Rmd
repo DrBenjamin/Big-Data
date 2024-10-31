@@ -1,0 +1,104 @@
+---
+title: "Data wrangling with sparklyr"
+output: pdf_document
+---
+
+Welcome to this tutorial paired-programming practice document! 
+
+In pairs, work through this document. A sample completed document is available on the tutorial github repository as well.
+
+
+# Task 1 
+
+Install the following packages if you do not already have them already, and load them with the `library()` function: 
+
+* sparklyr 
+* dplyr 
+* ggplot2
+* knitr 
+
+```{r warning=FALSE, message=FALSE}
+# your code here
+```
+
+
+# Task 2
+
+Create a spark connection that treats your local machine as a cluster. Load up the msleep dataset from the ggplot2 package, and put it into a Spark dataframe.
+
+```{r}
+# your code here
+```
+
+
+# Task 3
+
+Which dplyr functions can be used to have a first look at the data? Run them.
+
+```{r}
+# your code here
+```
+
+
+# Task 4
+
+Count the occurrence of all the different values for the order variable that are
+present in the dataset. Use kable to display any tables.
+
+```{r}
+# your code here
+```
+
+# Task 5
+
+Select the columns name, order and brainwt. Filter to only those rows where
+the order variable is Primates. Finally, arrange the result by brainwt. 
+Try to use the pipe operator %>% to cut down on how many lines of code you write.
+
+```{r}
+# your code here
+```
+
+
+# Task 6
+
+In this task, we will create a table of mean brain weight to body weight ratio,
+grouped by the variable order.
+Create a new column called brain_body_wt_ratio that is equal to brainwt/bodywt.
+Group by the variable order, and then calculate the mean for each group.
+
+```{r}
+# your code here
+```
+
+
+# Task 7
+
+The total number of missing values in each column can be viewed using the following code
+
+```{r warning = FALSE}
+sleep %>%
+  summarise_all(~sum(as.integer(is.na(.)))) %>%
+  kable()
+```
+
+Impute missing values for brainwt. Do this by creating a new column called
+brainwt_imputed, where NA values are replaced with the mean value for brainwt.
+Verify the result by displaying the head of a table with the columns name, 
+brainwt and brainwt_imputed. You may find the ifelse or case_when functions
+useful (Google them).
+
+```{r}
+# your code here
+```
+
+
+# Task 8
+
+Use collect() and ggplot to make a horizontal bar chart with order on the vertical axis and average sleep_total on the horizontal axis.
+You may find geom_col from ggplot useful.
+
+```{r}
+# your code here
+```
+
