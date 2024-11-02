@@ -9,6 +9,7 @@ output:
     keep_tex: true
     latex_engine: xelatex
 ---
+\setcounter{section}{0}
 
 We will largely follow chapters **2** and **3** of **Mastering Spark with R**, [https://therinspark.com](https://therinspark.com/index.html).
 
@@ -48,7 +49,7 @@ cars = copy_to(sc, mtcars, overwrite = TRUE)
 This will create a folder in your working directory called `cars.csv`. It 
 contains a csv with the cars data in it.
 
-```{ block4}
+```{r block4}
 spark_write_csv(cars, "cars.csv")
 ```
 
