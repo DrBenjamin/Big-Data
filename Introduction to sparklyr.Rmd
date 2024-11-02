@@ -35,12 +35,15 @@ Which dplyr functions can be used to have a first look at the data? Run them.
 ```{r}
 #install.packages("nycflights13", "Lahman")
 library(dplyr)
-iris_tbl <- copy_to(sc, iris, OVERWRITE = TRUE)
-flights_tbl <- copy_to(sc, nycflights13::flights, "flights", OVERWRITE = TRUE)
-batting_tbl <- copy_to(sc, Lahman::Batting, "batting", OVERWRITE = TRUE)
+library(ggplot2)
+library(jsonlite)
+
+iris_tbl <- copy_to(sc, iris, overwrite = TRUE)
+flights_tbl <- copy_to(sc, nycflights13::flights, "flights", overwrite = TRUE)
+batting_tbl <- copy_to(sc, Lahman::Batting, "batting", overwrite = TRUE)
 src_tbls(sc)
 
-flights_tbl %>% filter(dep_delay ==2)
+flights_tbl %>% filter(dep_delay == 2)
 
 delay <- flights_tbl %>% 
   group_by(tailnum) %>%
@@ -48,7 +51,9 @@ delay <- flights_tbl %>%
   filter(count > 20, dist < 2000, !is.na(delay)) %>%
   collect()
 
-library(ggplot2)
+# Saving as json
+#write_json(delay, "file.json")
+
 ggplot(delay, aes(dist, delay)) +
   geom_point(aes(size = count), alpha = 1/2) +
   geom_smooth() +

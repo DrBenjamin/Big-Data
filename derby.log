@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Sat Nov 02 07:41:36 CET 2024:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0192-eb9b-9cad-000002328ed0 
+Sat Nov 02 08:34:47 CET 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0192-ebcc-4cb4-00000249a688 
 on database directory memory:/Users/ben/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Documents/Courses/Big data analytics/Projects/Big Data/databaseName=metastore_db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@63c12fb0 
 Loaded from file:/Users/ben/spark/spark-3.5.0-bin-hadoop3/jars/derby-10.14.2.0.jar
 java.vendor=Eclipse Adoptium
