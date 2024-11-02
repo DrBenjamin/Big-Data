@@ -55,14 +55,3 @@ iris_spark_df = spark.createDataFrame(iris_df)
     
 # Show data
 st.dataframe(iris_spark_df, selection_mode='multi-column')
-
-
-
-
-
-
-
-
-# Show the Spark DataFrame
-iris_spark_df.show()
-

@@ -2,10 +2,8 @@
 
 Big Data course
 
-## MinIO
-
-To create `access_key` and `secret_key`, use the MinIO console
+## Knitting the Rmd file
 
 ```bash
-
+Rscript -e "rmarkdown::render('Introduction to sparklyr.Rmd')"
 ```

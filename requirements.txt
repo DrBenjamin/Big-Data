@@ -2,3 +2,4 @@ pyspark
 minio
 radian
 watchdog
+matplotlib

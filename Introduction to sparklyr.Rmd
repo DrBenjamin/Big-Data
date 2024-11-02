@@ -2,15 +2,19 @@
 title: "Introduction to sparklyr"
 output:
   pdf_document:
-    includes:
-      in_header: header.tex
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
 ---
 
 We will largely follow chapters **2** and **3** of **Mastering Spark with R**, [https://therinspark.com](https://therinspark.com/index.html).
 
 First install the following packages if you do not already have them already, and load them with the `library()` function: 
 
-```{r warning=FALSE, message=FALSE}
+```{r block1, warning=FALSE, message=FALSE}
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
@@ -26,14 +30,14 @@ To confirm the change has taken effect, close and then reopen RStudio, and type 
 
 ## Connecting
 
-```{r}
+```{r block2}
 sc = spark_connect(master = 'local')
 ```
 
 The following code will take the built-in mtcars dataset, stored in an R dataframe, and put it into a spark dataframe. We will use this dataset in many of our examples.
 
 
-```{r}
+```{r block3}
 cars = copy_to(sc, mtcars, overwrite = TRUE)
 ```
 
@@ -44,7 +48,7 @@ cars = copy_to(sc, mtcars, overwrite = TRUE)
 This will create a folder in your working directory called `cars.csv`. It 
 contains a csv with the cars data in it.
 
-```{r}
+```{ block4}
 spark_write_csv(cars, "cars.csv")
 ```
 
@@ -54,7 +58,7 @@ may need to delete the folder before running the code again.
 
 ### Read from a csv file
 
-```{r}
+```{r block5}
 spark_read_csv(sc, 'cars.csv') %>%
   head() %>%
   kable()
@@ -67,13 +71,13 @@ instead connect to Spark and would be run in parallel across the cluster.
 
 ### Create a new column
 
-```{r warning = FALSE}
+```{r block6, warning = FALSE}
 cars = mutate(cars, transmission = ifelse(am == 0, 'automatic', 'manual'))
 ```
 
 ### Select columns
 
-```{r}
+```{r block7}
 select(cars, am, transmission) %>%
   head() %>%
   kable()
@@ -81,7 +85,7 @@ select(cars, am, transmission) %>%
 
 # Calculate the mean of each column
 
-```{r}
+```{r block8}
 summarise_all(cars, mean, na.rm = TRUE) %>%
   kable()
 ```
@@ -93,7 +97,7 @@ does not have a full-fledged equivalent of ggplot. It is typically best to perfo
 data manipulations in Spark, then bring the result back to R using the collect() 
 command. Finally, we use the regular ggplot package to make the graph.
 
-```{r}
+```{r block9}
 # Data manipulations are done first using spark
 car_group = cars %>%
   group_by(cyl) %>%
@@ -108,41 +112,13 @@ ggplot(aes(as.factor(cyl), mpg), data = car_group) +
   coord_flip()
 ```
 
-```{r}
-install.packages("nycflights13", "Lahman")
-library(dplyr)
-library(ggplot2)
-library(jsonlite)
-
-iris_tbl <- copy_to(sc, iris, overwrite = TRUE)
-flights_tbl <- copy_to(sc, nycflights13::flights, "flights", overwrite = TRUE)
-batting_tbl <- copy_to(sc, Lahman::Batting, "batting", overwrite = TRUE)
-src_tbls(sc)
-
-flights_tbl %>% filter(dep_delay == 2)
-
-delay <- flights_tbl %>% 
-  group_by(tailnum) %>%
-  summarise(count = n(), dist = mean(distance, na.rm = TRUE), delay = mean(arr_delay, na.rm = TRUE)) %>%
-  filter(count > 20, dist < 2000, !is.na(delay)) %>%
-  collect()
-
-# Saving as json
-#write_json(delay, "file.json")
-
-ggplot(delay, aes(dist, delay)) +
-  geom_point(aes(size = count), alpha = 1/2) +
-  geom_smooth() +
-  scale_size_area(max_size = 2)
-```
-
 ## Models, in brief
 
 We will go into more details about these models in coming lectures.
 
 ### OLS
 
-```{r}
+```{r block10}
 ols_model = ml_linear_regression(cars, mpg ~ hp + disp)
 summary(ols_model)
 ```
@@ -153,7 +129,7 @@ The command `ml_logistic_regression` can be used to train a multinomial model, w
 the dependent variable has more than two categories. However, it does not report
 standard deviations of parameter estimates.
 
-```{r}
+```{r block11}
 lr_model = ml_logistic_regression(cars, am ~ hp + disp)
 summary(lr_model)
 ```
@@ -163,14 +139,14 @@ logistic model with binary variable, but **dependent variables with more than
 two categories are not supported!** However, it does report standard deviations
 of parameter estimates.
 
-```{r}
+```{r block12}
 lr_model = ml_generalized_linear_regression(cars, am ~ hp + disp, family = 'binomial')
 summary(lr_model)
 ```
 
 ### Multilayer perceptron
 
-```{r}
+```{r block13}
 mlp_model = ml_multilayer_perceptron_classifier(
   cars,
   am ~ hp + disp,
@@ -187,7 +163,7 @@ select(predictions, prediction, probability_0, probability_1) %>%
  
  Classification trees:
  
-```{r}
+```{r block14}
  gbt_model = ml_gradient_boosted_trees(cars, am ~ hp + disp, type = 'classification')
  predictions = ml_predict(gbt_model, cars)
  
@@ -198,7 +174,7 @@ select(predictions, prediction, probability_0, probability_1) %>%
 
 Regression trees:
 
-```{r}
+```{r block15}
 gbt_model = ml_gradient_boosted_trees(cars, mpg ~ hp + disp, type = 'regression')
 predictions = ml_predict(gbt_model, cars)
 
@@ -218,6 +194,6 @@ more closely. I encourage you to explorer others! See documentation here:
 The following code chukn disconnects from the cluster. You should always do this
 after your job has been run.
 
-```{r}
+```{r block16}
 spark_disconnect(sc)
 ```
