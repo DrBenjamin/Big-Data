@@ -3,7 +3,7 @@ title: "Introduction to sparklyr"
 output: pdf_document
 ---
 
-We will largely follow chapters 2 and 3 of Mastering Spark with R, [https://therinspark.com](https://therinspark.com/index.html).
+We will largely follow chapters **2** and **3** of **Mastering Spark with R**, [https://therinspark.com](https://therinspark.com/index.html).
 
 First install the following packages if you do not already have them already, and load them with the `library()` function: 
 
@@ -33,7 +33,26 @@ sc = spark_connect(master = 'local')
 Which dplyr functions can be used to have a first look at the data? Run them.
 
 ```{r}
-# your code here
+#install.packages("nycflights13", "Lahman")
+library(dplyr)
+iris_tbl <- copy_to(sc, iris, OVERWRITE = TRUE)
+flights_tbl <- copy_to(sc, nycflights13::flights, "flights", OVERWRITE = TRUE)
+batting_tbl <- copy_to(sc, Lahman::Batting, "batting", OVERWRITE = TRUE)
+src_tbls(sc)
+
+flights_tbl %>% filter(dep_delay ==2)
+
+delay <- flights_tbl %>% 
+  group_by(tailnum) %>%
+  summarise(count = n(), dist = mean(distance, na.rm = TRUE), delay = mean(arr_delay, na.rm = TRUE)) %>%
+  filter(count > 20, dist < 2000, !is.na(delay)) %>%
+  collect()
+
+library(ggplot2)
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth() +
+  scale_size_area(max_size = 2)
 ```
 
 

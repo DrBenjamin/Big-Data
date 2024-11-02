@@ -1,0 +1,314 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Introduction to sparklyr},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Introduction to sparklyr}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+We will largely follow chapters \textbf{2} and \textbf{3} of
+\textbf{Mastering Spark with R},
+\href{https://therinspark.com/index.html}{https://therinspark.com}.
+
+First install the following packages if you do not already have them
+already, and load them with the \texttt{library()} function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(sparklyr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(knitr)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Preliminiaries}\label{preliminiaries}
+
+If you are working on EIDF, first make sure that the default working
+directory in RStudio is your folder. In RStudio, select Tools
+-\textgreater{} Global Options. Change the default working directory to
+be /work/eidf071/eidf071/.
+
+To confirm the change has taken effect, close and then reopen RStudio,
+and type getpw() into the console. It should show your working directory
+correctly as above.
+
+\subsection{Connecting}\label{connecting}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sc }\OtherTok{=} \FunctionTok{spark\_connect}\NormalTok{(}\AttributeTok{master =} \StringTok{\textquotesingle{}local\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Task 3}\label{task-3}
+
+Which dplyr functions can be used to have a first look at the data? Run
+them.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages("nycflights13", "Lahman")}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\NormalTok{iris\_tbl }\OtherTok{\textless{}{-}} \FunctionTok{copy\_to}\NormalTok{(sc, iris, }\AttributeTok{OVERWRITE =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{flights\_tbl }\OtherTok{\textless{}{-}} \FunctionTok{copy\_to}\NormalTok{(sc, nycflights13}\SpecialCharTok{::}\NormalTok{flights, }\StringTok{"flights"}\NormalTok{, }\AttributeTok{OVERWRITE =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{batting\_tbl }\OtherTok{\textless{}{-}} \FunctionTok{copy\_to}\NormalTok{(sc, Lahman}\SpecialCharTok{::}\NormalTok{Batting, }\StringTok{"batting"}\NormalTok{, }\AttributeTok{OVERWRITE =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{src\_tbls}\NormalTok{(sc)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "batting" "flights" "iris"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{flights\_tbl }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(dep\_delay }\SpecialCharTok{==}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   SQL [?? x 19]
+## # Database: spark_connection
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    <int> <int> <int>    <int>          <int>     <dbl>    <int>          <int>
+##  1  2013     1     1      517            515         2      830            819
+##  2  2013     1     1      542            540         2      923            850
+##  3  2013     1     1      702            700         2     1058           1014
+##  4  2013     1     1      715            713         2      911            850
+##  5  2013     1     1      752            750         2     1025           1029
+##  6  2013     1     1      917            915         2     1206           1211
+##  7  2013     1     1      932            930         2     1219           1225
+##  8  2013     1     1     1028           1026         2     1350           1339
+##  9  2013     1     1     1042           1040         2     1325           1326
+## 10  2013     1     1     1231           1229         2     1523           1529
+## # i more rows
+## # i 11 more variables: arr_delay <dbl>, carrier <chr>, flight <int>,
+## #   tailnum <chr>, origin <chr>, dest <chr>, air_time <dbl>, distance <dbl>,
+## #   hour <dbl>, minute <dbl>, time_hour <dttm>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{delay }\OtherTok{\textless{}{-}}\NormalTok{ flights\_tbl }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{group\_by}\NormalTok{(tailnum) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{count =} \FunctionTok{n}\NormalTok{(), }\AttributeTok{dist =} \FunctionTok{mean}\NormalTok{(distance, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{delay =} \FunctionTok{mean}\NormalTok{(arr\_delay, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(count }\SpecialCharTok{\textgreater{}} \DecValTok{20}\NormalTok{, dist }\SpecialCharTok{\textless{}} \DecValTok{2000}\NormalTok{, }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(delay)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{collect}\NormalTok{()}
+
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{ggplot}\NormalTok{(delay, }\FunctionTok{aes}\NormalTok{(dist, delay)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{size =}\NormalTok{ count), }\AttributeTok{alpha =} \DecValTok{1}\SpecialCharTok{/}\DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_size\_area}\NormalTok{(}\AttributeTok{max\_size =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+\end{verbatim}
+
+\includegraphics{Introduction-to-sparklyr_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\section{Task 4}\label{task-4}
+
+Count the occurrence of all the different values for the order variable
+that are present in the dataset. Use kable to display any tables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# your code here}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Task 5}\label{task-5}
+
+Select the columns name, order and brainwt. Filter to only those rows
+where the order variable is Primates. Finally, arrange the result by
+brainwt. Try to use the pipe operator \%\textgreater\% to cut down on
+how many lines of code you write.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# your code here}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Task 6}\label{task-6}
+
+In this task, we will create a table of mean brain weight to body weight
+ratio, grouped by the variable order. Create a new column called
+brain\_body\_wt\_ratio that is equal to brainwt/bodywt. Group by the
+variable order, and then calculate the mean for each group.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# your code here}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Task 7}\label{task-7}
+
+The total number of missing values in each column can be viewed using
+the following code
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sleep }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise\_all}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\FunctionTok{sum}\NormalTok{(}\FunctionTok{as.integer}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(.)))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rrr@{}}
+\toprule\noalign{}
+extra & group & ID \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 0 & 0 \\
+\end{longtable}
+
+Impute missing values for brainwt. Do this by creating a new column
+called brainwt\_imputed, where NA values are replaced with the mean
+value for brainwt. Verify the result by displaying the head of a table
+with the columns name, brainwt and brainwt\_imputed. You may find the
+ifelse or case\_when functions useful (Google them).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# your code here}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Task 8}\label{task-8}
+
+Use collect() and ggplot to make a horizontal bar chart with order on
+the vertical axis and average sleep\_total on the horizontal axis. You
+may find geom\_col from ggplot useful.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# your code here}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}
