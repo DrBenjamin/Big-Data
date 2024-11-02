@@ -48,3 +48,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 .vscode/settings.json
+
+# CSV data
+cars.csv/*

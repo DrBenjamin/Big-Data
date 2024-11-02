@@ -1,6 +1,9 @@
 ---
 title: "Introduction to sparklyr"
-output: pdf_document
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
 ---
 
 We will largely follow chapters **2** and **3** of **Mastering Spark with R**, [https://therinspark.com](https://therinspark.com/index.html).
@@ -27,13 +30,86 @@ To confirm the change has taken effect, close and then reopen RStudio, and type 
 sc = spark_connect(master = 'local')
 ```
 
+The following code will take the built-in mtcars dataset, stored in an R dataframe, and put it into a spark dataframe. We will use this dataset in many of our examples.
 
-# Task 3
-
-Which dplyr functions can be used to have a first look at the data? Run them.
 
 ```{r}
-#install.packages("nycflights13", "Lahman")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+## Data input/output
+
+### Write to a csv file
+
+This will create a folder in your working directory called `cars.csv`. It 
+contains a csv with the cars data in it.
+
+```{r}
+spark_write_csv(cars, "cars.csv")
+```
+
+Note that running this more than once will result in an error because 
+spark_write_csv will not overwrite a folder which is already created. You
+may need to delete the folder before running the code again.
+
+### Read from a csv file
+
+```{r}
+spark_read_csv(sc, 'cars.csv') %>%
+  head() %>%
+  kable()
+```
+
+## Data wrangling
+
+Familiar commands from dplyr work as you would expect, but now they
+instead connect to Spark and would be run in parallel across the cluster.
+
+### Create a new column
+
+```{r warning = FALSE}
+cars = mutate(cars, transmission = ifelse(am == 0, 'automatic', 'manual'))
+```
+
+### Select columns
+
+```{r}
+select(cars, am, transmission) %>%
+  head() %>%
+  kable()
+```
+
+# Calculate the mean of each column
+
+```{r}
+summarise_all(cars, mean, na.rm = TRUE) %>%
+  kable()
+```
+
+## Plots
+
+Creating a plot isn't usually highly computationally demanding. Therefore, sparklyr
+does not have a full-fledged equivalent of ggplot. It is typically best to perform all 
+data manipulations in Spark, then bring the result back to R using the collect() 
+command. Finally, we use the regular ggplot package to make the graph.
+
+```{r}
+# Data manipulations are done first using spark
+car_group = cars %>%
+  group_by(cyl) %>%
+  summarise(mpg = sum(mpg, na.rm = TRUE)) %>%
+  # `collect` brings the spark dataframe back to a regular R dataframe
+  collect()
+
+# Now use ggplot on the R dataframe car_group
+ggplot(aes(as.factor(cyl), mpg), data = car_group) +
+  geom_col(fill = 'SteelBlue') +
+  xlab('Cylinders') +
+  coord_flip()
+```
+
+```{r}
+install.packages("nycflights13", "Lahman")
 library(dplyr)
 library(ggplot2)
 library(jsonlite)
@@ -60,66 +136,88 @@ ggplot(delay, aes(dist, delay)) +
   scale_size_area(max_size = 2)
 ```
 
+## Models, in brief
 
-# Task 4
+We will go into more details about these models in coming lectures.
 
-Count the occurrence of all the different values for the order variable that are
-present in the dataset. Use kable to display any tables.
-
-```{r}
-# your code here
-```
-
-# Task 5
-
-Select the columns name, order and brainwt. Filter to only those rows where
-the order variable is Primates. Finally, arrange the result by brainwt. 
-Try to use the pipe operator %>% to cut down on how many lines of code you write.
+### OLS
 
 ```{r}
-# your code here
+ols_model = ml_linear_regression(cars, mpg ~ hp + disp)
+summary(ols_model)
 ```
 
+## Logistic regression
 
-# Task 6
-
-In this task, we will create a table of mean brain weight to body weight ratio,
-grouped by the variable order.
-Create a new column called brain_body_wt_ratio that is equal to brainwt/bodywt.
-Group by the variable order, and then calculate the mean for each group.
+The command `ml_logistic_regression` can be used to train a multinomial model, where
+the dependent variable has more than two categories. However, it does not report
+standard deviations of parameter estimates.
 
 ```{r}
-# your code here
+lr_model = ml_logistic_regression(cars, am ~ hp + disp)
+summary(lr_model)
 ```
 
+The command `ml_generalized_linear_regression` can also be used to train a 
+logistic model with binary variable, but **dependent variables with more than
+two categories are not supported!** However, it does report standard deviations
+of parameter estimates.
 
-# Task 7
+```{r}
+lr_model = ml_generalized_linear_regression(cars, am ~ hp + disp, family = 'binomial')
+summary(lr_model)
+```
 
-The total number of missing values in each column can be viewed using the following code
+### Multilayer perceptron
 
-```{r warning = FALSE}
-sleep %>%
-  summarise_all(~sum(as.integer(is.na(.)))) %>%
+```{r}
+mlp_model = ml_multilayer_perceptron_classifier(
+  cars,
+  am ~ hp + disp,
+  layers = c(2, 8, 8, 2)
+)
+predictions = ml_predict(mlp_model, cars)
+
+select(predictions, prediction, probability_0, probability_1) %>%
+  head() %>%
   kable()
 ```
 
-Impute missing values for brainwt. Do this by creating a new column called
-brainwt_imputed, where NA values are replaced with the mean value for brainwt.
-Verify the result by displaying the head of a table with the columns name, 
-brainwt and brainwt_imputed. You may find the ifelse or case_when functions
-useful (Google them).
-
+ ### Gradient boosted tress
+ 
+ Classification trees:
+ 
 ```{r}
-# your code here
+ gbt_model = ml_gradient_boosted_trees(cars, am ~ hp + disp, type = 'classification')
+ predictions = ml_predict(gbt_model, cars)
+ 
+ select(predictions, prediction, probability_0, probability_1) %>%
+   head() %>%
+   kable()
 ```
 
-
-# Task 8
-
-Use collect() and ggplot to make a horizontal bar chart with order on the vertical axis and average sleep_total on the horizontal axis.
-You may find geom_col from ggplot useful.
+Regression trees:
 
 ```{r}
-# your code here
+gbt_model = ml_gradient_boosted_trees(cars, mpg ~ hp + disp, type = 'regression')
+predictions = ml_predict(gbt_model, cars)
+
+select(predictions, mpg, prediction) %>%
+  head() %>%
+  kable()
 ```
 
+### Other models
+
+Apache Spark supports many other models - I have just chosen a few to look at
+more closely. I encourage you to explorer others! See documentation here:
+[https://spark.apache.org/docs/latest/ml-classification-regression.html](https://spark.apache.org/docs/latest/ml-classification-regression.html)
+
+## Disconnecting
+
+The following code chukn disconnects from the cluster. You should always do this
+after your job has been run.
+
+```{r}
+spark_disconnect(sc)
+```
