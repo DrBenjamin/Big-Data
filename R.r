@@ -1,2 +1,0 @@
-# R version
-R.version
