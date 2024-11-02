@@ -51,3 +51,13 @@ rsconnect/
 
 # CSV data
 cars.csv/*
+.DS_Store
+.metals/*
+.scala-build/*
+.bsp/scala.json
+project/*
+src/main/scala/.scala-build/*
+src/main/scala/.bsp/*
+target/*
+sbt.json
+.bloop/*
