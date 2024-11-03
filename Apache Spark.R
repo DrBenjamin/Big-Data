@@ -45,7 +45,7 @@ iris_tbl <- copy_to(sc, iris)
 iris_tbl
 
 # Use SQL on Spark
-dbGetQuery(sc, "SELECT count(*) FROM mtcars")
+dbGetQuery(sc, "SELECT count(*) FROM iris")
 
 # Disconnect
 spark_disconnect(sc)
