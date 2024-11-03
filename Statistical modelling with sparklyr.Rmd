@@ -1,0 +1,100 @@
+---
+title: "Statistical modelling with sparklyr"
+output: pdf_document
+---
+
+**Week 4 tutorial task**
+
+In this exercise, we will be exploring some statistical models with sparklyr.
+
+Load up the required packages.
+
+```{r warning=FALSE, message=FALSE}
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(broom)
+```
+
+Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
+
+```{r warning = FALSE}
+sc = spark_connect(master = "local")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+# Task 1
+
+One-hot encode the cyl variable. You may find the ifelse function
+useful (Google it).
+
+```{r}
+# your code here
+```
+
+
+# Task 2
+
+Create an  OLS model that predicts the variable mpg using hp, wt and number
+of cylinders as predictor variables. **Remember that categorical variables used as 
+predictors must be one-hot encoded! Also, don't fall into the dummy variable trap!** 
+Apply the tidy function from the broom package to the fitted model and display 
+the results in a table. What do the entries in the table mean? What is their interpretation?
+
+```{r}
+# your code here
+```
+
+# Task 3
+
+The variable mpg **must** be positive. The exponential function has the property 
+that it is always positive for any real value of its argument. We can take advantage
+of this to create an OLS model where the dependent variable can never be negative,
+regardless of the value of the coefficients or independent variables. This is 
+done by replacing mpg with its logarithm in the model.
+
+Create a new column in the Spark dataframe that is the logarithm of mpg. Then
+fit a new OLS model with log(mpg) as the dependent variable. Display the
+results in a table.
+
+```{r}
+# your code here
+```
+
+
+# Task 4
+
+Recall that the upper/lower 95% confidence interval for fitted coefficients 
+in a regression are given by adding/subtracting 1.96 standard deviations.
+
+In the results table, create two new columns for the upper and lower limits
+of the 95% confidence interval. Then create a column
+that has the estimated coefficient, followed by a bracket with the 95% confidence interval, 
+with all numbers rounded to 2 decimal places. You may find the paste and round functions
+useful (Google them). Display the results in a table.
+
+```{r}
+# your code here
+```
+
+
+# Task 5
+
+Evaluate the OLS model with ln(mpg) as the dependent variable using the ml_evaluate function. The main metrics that are
+of interest are R^2, mean absolute error, mean squared error, and root mean 
+squared error. Print these metrics out.
+
+```{r}
+# your code here
+```
+
+
+# Task 6
+
+Calculate the mean squared error for your model predictions "by hand". Remember to use dplyr functions only!
+
+```{r}
+# your code here
+```
+

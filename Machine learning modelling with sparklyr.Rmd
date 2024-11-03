@@ -1,0 +1,142 @@
+---
+title: "Machine learning modelling with sparklyr"
+output: pdf_document
+---
+
+**Week 5 tutorial task**
+
+In this exercise, we will be exploring some machine learning models with sparklyr.
+
+Load up the required packages.
+
+```{r warning=FALSE, message=FALSE}
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(broom)
+```
+
+Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
+
+```{r warning = FALSE}
+sc = spark_connect(master = "local")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+
+# Task 1
+
+One-hot encode the variable cyl, and create a new column called gear_relabelled,
+that relabels the gear variable so that it consists of numbers starting at 0. You
+may find the case_when function useful (Google it).
+
+```{r}
+# your code here
+```
+
+
+# Task 2
+
+Create a multinomial logistic regression model that predicts the number of gears,
+using hp and number of cylinders as predictor variables. **Remember to not fall
+into the dummy variable trap!** 
+Apply the tidy function to the model, and display the result of doing this 
+in a table. What do the entries in the table mean? What is their interpretation?
+Is there anything that was in the results table of the OLS model that is not
+present in the results table for this model?
+
+```{r  warning = FALSE}
+# your code here
+```
+
+
+# Task 3
+
+Evaluate the multinomial logistic regression model. The main metrics that are
+of interest are true positive rate, false positive rate, accuracy, precision and
+recall. Print these metrics out. Do you notice anything about the true positive 
+rate and the recall?
+
+```{r  warning = FALSE}
+# your code here
+```
+
+
+# Task 4
+
+Create a binary logistic regression model that predicts the variable am with hp and
+vs as predictor variables, using ml_generalized_linear_regression. 
+Apply the tidy function to the model, and display the result of doing this in a table.
+
+```{r}
+# your code here
+```
+
+
+# Task 5
+
+Recall that the odds ratio from a logistic regression model is given by the
+exponential of a fitted coefficient. The 95% confidence interval for the odds ratio
+is given by the exponential of the upper and lower limits of the 95% confidence
+interval for the fitted coefficient.
+
+In the results table, create three new columns for the odds ratio, and the upper
+and lower limits of its 95% confidence interval. Then create a column
+that has the odds ratio, followed by a bracket with the 95% confidence interval, 
+with all numbers rounded to 2 decimal places. Display the results in a table.
+
+```{r}
+# your code here
+```
+
+
+# Task 6
+
+Access and print out the AIC value for the model.
+
+```{r  warning = FALSE}
+# your code here
+```
+
+
+# Task 7
+
+Create a new column that is the z-score of hp.
+
+```{r}
+# your code here
+```
+
+
+# Task 8
+
+Create a multilayer perceptron classifier that predicts the variable gear, 
+using hp and number of cylinders as predictor variables. Extract predictions
+from the model, and show the first few rows of predictions in a table. 
+**Make sure that the number of neurons in the input and output layers are correct.
+Make sure that continuous variables are normalised, and categorical variables
+are one-hot encoded.**
+
+```{r}
+# your code here
+```
+
+# Task 9
+
+Use ml_evaluate to print out model metrics. Which metrics are available?
+
+```{r}
+# your code here
+```
+
+
+# Task 10
+
+Create a gradient boosted tree classifier that predicts the variable am, 
+using hp and number of cylinders as predictor variables. Calculate the C
+statistic using ml_binary_classification_evaluator.
+
+```{r}
+# your code here
+```

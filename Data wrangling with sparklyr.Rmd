@@ -3,6 +3,8 @@ title: "Data wrangling with sparklyr"
 output: pdf_document
 ---
 
+**Week 3 tutorial task**
+
 Welcome to this tutorial paired-programming practice document! 
 
 In pairs, work through this document. A sample completed document is available on the tutorial github repository as well.

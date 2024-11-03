@@ -1,0 +1,146 @@
+---
+title: "Compendium of mistakes"
+output: pdf_document
+---
+
+**Week 6 tutorial task**
+
+In this tutorial, we'll be looking at common mistakes that have been made historically on this course.
+You won't be writing any code. You'll be telling us what is wrong with code in the provided examples, and why doing similar in your assessment will result in a loss of marks.
+
+We will be treating the mtcars dataset as if it was arbitrarily big. This means it could have as large a number of rows as you want. This is how you should treat the dataset in your assessment.
+
+An important challenge is to understand why some of the code snippets below are not appropriate in a real big data setting.
+
+# Task 1
+
+```{r}
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(broom)
+library(kableExtra)
+```
+
+# Task 2
+
+```{r warning = FALSE}
+sc = spark_connect(master = "local")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+# Task 3
+
+```{r}
+cars %>% 
+  collect()
+```
+
+# Task 4
+
+```{r}
+cars %>% 
+  summary()
+```
+
+# Task 5
+
+```{r}
+cars %>% 
+  sdf_describe() %>%
+  kable()
+```
+
+# Task 6
+
+```{r}
+cars = mutate(cars,
+  # one-hot encoding of cyl
+  cyl_4 = ifelse(cyl == 4, 1, 0),
+  cyl_6 = ifelse(cyl == 6, 1, 0),
+  cyl_8 = ifelse(cyl == 8, 1, 0),
+  # The levels must be labelled so that they start from 0
+  gear_relabelled = case_when(
+    gear == 3 ~ 0,
+    gear == 4 ~ 1,
+    gear == 5 ~ 2
+  )
+)
+
+cars %>%
+	summarise(mean_gear_relabelled = mean(gear_relabelled, na.rm = TRUE))
+```
+
+# Task 7
+
+```{r}
+cars %>%
+	pull(mpg) %>%
+  mean()
+```
+
+# Task 8
+
+```{r}
+mn_model = ml_logistic_regression(cars,
+  am ~ hp + cyl_6 + cyl_8)
+
+predictions = ml_predict(mn_model)
+
+pred = predictions %>% 
+  select(am, probability_1) %>%
+  collect()
+
+pred %>%
+  ggplot(aes(as.factor(am), probability_1)) +
+  geom_boxplot()
+```
+```{r}
+mn_model = ml_logistic_regression(cars, gear_relabelled ~ hp + wt + mpg + drat + qsec + disp + vs + cyl_6 + cyl_8)
+```
+
+# Task 9
+
+```{r}
+cars2 = cars %>%
+  select(mpg, cyl)
+
+cars3 = cars %>%
+  select(mpg, drat, wt)
+
+cars4 = cars %>%
+  select(mpg, cyl, carb, hp)
+
+cars5 = cars %>%
+  select(hp, drat, wt)
+```
+
+# Task 10
+
+```{r}
+ggplot(cars, aes(cyl)) + 
+  geom_bar()
+
+ggplot(cars, aes(mpg)) + 
+  geom_boxplot()
+
+ggplot(cars, aes(mpg)) + 
+  geom_histogram()
+```
+
+# Task 11
+
+```{r}
+na.omit(cars)
+```
+
+# Task 12
+
+```{r}
+#install.packages("corrr")
+library(corrr)
+
+correlate(cars)
+```
+
