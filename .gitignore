@@ -61,3 +61,4 @@ src/main/scala/.bsp/*
 target/*
 sbt.json
 .bloop/*
+derby.log
