@@ -2,6 +2,8 @@ name: big-data
 dependencies:
   - python=3.11
   - pip
+  - jupyter
+  - jupyter-cache
   - pip:
     - streamlit
     - -r requirements.txt

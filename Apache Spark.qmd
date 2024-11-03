@@ -1,0 +1,101 @@
+---
+title: "Quarto"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+knitr:
+  opts_chunk: 
+    collapse: true
+    comment: "#>" 
+    R.options:
+      knitr.graphics.auto_pdf: true
+execute:
+  echo: true
+  output: true
+  enabled: true
+  python: ~/miniforge3/envs/big-data/bin/python
+jupyter: python3
+---
+
+# Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+R version
+
+```{r}
+#| echo: true
+#| output: true
+print(R.version)
+```
+
+Python version
+
+```{python}
+import sys
+sys.version
+```
+
+```{r}
+#| echo: true
+#| output: true
+#install.packages("sparklyr")
+library(sparklyr)
+#install.packages("pysparklyr")
+library("pysparklyr")
+library(devtools)
+library(httr)
+#install_github("nagdevAmruthnath/minio.s3")
+library("minio.s3")
+library(aws.s3)
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(DBI)
+```
+
+## Local Spark Cluster
+
+```{r}
+#| echo: true
+#| output: true
+#sparklyr::spark_install(version = "3.5.0")
+spark_installed_versions()
+sc <- spark_connect(master = "local")
+```
+
+```{r}
+#| echo: true
+#| output: true
+# Setting the environment variables for MinIO
+# https://localhost:9001/browser/templategenerator
+set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
+Sys.setenv("AWS_ACCESS_KEY_ID" = "health",
+           "AWS_SECRET_ACCESS_KEY" = "NOentry#23",
+           "AWS_SSL_ENABLED" = "TRUE",
+           "AWS_S3_ENDPOINT" = "127.0.0.1:9000")
+
+# Get file from the MinIO server
+b <- get_bucket(bucket = 'templategenerator', region = "", use_https = TRUE)
+iris <- aws.s3::s3read_using(FUN = read.csv, object = "iris.csv", bucket = b, opts = list(use_https = TRUE, region = ""))
+
+# Spark dataframe
+iris_tbl <- copy_to(sc, iris)
+
+# Show dataframe
+iris_tbl
+```
+
+```{r}
+#| echo: true
+#| output: true
+# Use SQL on Spark
+dbGetQuery(sc, "SELECT count(*) FROM iris")
+
+# Disconnect
+spark_disconnect(sc)
+```

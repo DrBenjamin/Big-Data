@@ -3,3 +3,5 @@ minio
 radian
 watchdog
 matplotlib
+jupyter
+jupyter-cache
