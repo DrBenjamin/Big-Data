@@ -5,3 +5,7 @@ watchdog
 matplotlib
 jupyter
 jupyter-cache
+sqlalchemy
+psycopg2
+openpyxl
+apache-airflow
