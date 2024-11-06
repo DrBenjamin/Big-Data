@@ -20,7 +20,7 @@ Install the following packages if you do not already have them already, and load
 * knitr 
 
 ```{r warning=FALSE, message=FALSE}
-# your code here
+
 ```
 
 
@@ -29,7 +29,7 @@ Install the following packages if you do not already have them already, and load
 Create a spark connection that treats your local machine as a cluster. Load up the msleep dataset from the ggplot2 package, and put it into a Spark dataframe.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -38,7 +38,7 @@ Create a spark connection that treats your local machine as a cluster. Load up t
 Which dplyr functions can be used to have a first look at the data? Run them.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -48,7 +48,7 @@ Count the occurrence of all the different values for the order variable that are
 present in the dataset. Use kable to display any tables.
 
 ```{r}
-# your code here
+
 ```
 
 # Task 5
@@ -58,7 +58,7 @@ the order variable is Primates. Finally, arrange the result by brainwt.
 Try to use the pipe operator %>% to cut down on how many lines of code you write.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -70,7 +70,7 @@ Create a new column called brain_body_wt_ratio that is equal to brainwt/bodywt.
 Group by the variable order, and then calculate the mean for each group.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -91,7 +91,7 @@ brainwt and brainwt_imputed. You may find the ifelse or case_when functions
 useful (Google them).
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -101,6 +101,6 @@ Use collect() and ggplot to make a horizontal bar chart with order on the vertic
 You may find geom_col from ggplot useful.
 
 ```{r}
-# your code here
+
 ```
 
