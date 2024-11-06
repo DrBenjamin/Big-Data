@@ -20,7 +20,10 @@ Install the following packages if you do not already have them already, and load
 * knitr 
 
 ```{r warning=FALSE, message=FALSE}
-
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
 ```
 
 
@@ -29,7 +32,8 @@ Install the following packages if you do not already have them already, and load
 Create a spark connection that treats your local machine as a cluster. Load up the msleep dataset from the ggplot2 package, and put it into a Spark dataframe.
 
 ```{r}
-
+sc <- spark_connect(master = "local")
+msleep_spark <- copy_to(sc, msleep, overwrite = TRUE)
 ```
 
 
@@ -38,7 +42,25 @@ Create a spark connection that treats your local machine as a cluster. Load up t
 Which dplyr functions can be used to have a first look at the data? Run them.
 
 ```{r}
+# dplyr functions
+msleep_spark %>%
+  head()
 
+msleep_spark %>%
+  glimpse()
+
+msleep_spark %>%
+  str()
+
+msleep_spark %>%
+  sdf_describe()
+
+msleep_spark %>%
+  colnames()
+
+msleep_spark %>%
+  head() %>%
+  kable()
 ```
 
 
@@ -48,6 +70,9 @@ Count the occurrence of all the different values for the order variable that are
 present in the dataset. Use kable to display any tables.
 
 ```{r}
+msleep_spark %>%
+  count(order) %>%
+  kable()
 
 ```
 
@@ -58,9 +83,12 @@ the order variable is Primates. Finally, arrange the result by brainwt.
 Try to use the pipe operator %>% to cut down on how many lines of code you write.
 
 ```{r}
-
+msleep_spark %>%
+  select(name, order, brainwt) %>%
+  filter(order=="Primates") %>%
+  arrange(desc(brainwt)) %>%
+  kable()
 ```
-
 
 # Task 6
 
@@ -70,16 +98,19 @@ Create a new column called brain_body_wt_ratio that is equal to brainwt/bodywt.
 Group by the variable order, and then calculate the mean for each group.
 
 ```{r}
-
+msleep_spark %>%
+  mutate(braint_body_wt_ratio = brainwt / bodywt) %>%
+  group_by(order) %>%
+  summarise(mean_order = mean(braint_body_wt_ratio, na.rm = TRUE)) %>%
+  arrange(desc(mean_order))
 ```
-
 
 # Task 7
 
 The total number of missing values in each column can be viewed using the following code
 
 ```{r warning = FALSE}
-sleep %>%
+msleep_spark %>%
   summarise_all(~sum(as.integer(is.na(.)))) %>%
   kable()
 ```
@@ -91,7 +122,12 @@ brainwt and brainwt_imputed. You may find the ifelse or case_when functions
 useful (Google them).
 
 ```{r}
-
+msleep_spark %>%
+  mutate(brainwt_imputed = ifelse(is.na(brainwt),
+                                  mean(brainwt, na.rm = TRUE),
+                                  brainwt)) %>%
+  select(name, brainwt, brainwt_imputed) %>%
+  head()
 ```
 
 
@@ -101,6 +137,16 @@ Use collect() and ggplot to make a horizontal bar chart with order on the vertic
 You may find geom_col from ggplot useful.
 
 ```{r}
+sleep_order <- msleep_spark %>% 
+   group_by(order) %>% 
+   summarise(mean = mean(sleep_total, na.rm = TRUE)) %>% 
+   collect()
 
+sleep_order %>% 
+   ggplot(aes(x=order, y=mean)) +
+   geom_col(fill="Steelblue") +
+   xlab("Order")+
+   ylab("Average Sleep Total") +
+   labs(title="The Average Total Sleep for each order of Spieces") +
+   coord_flip()
 ```
-

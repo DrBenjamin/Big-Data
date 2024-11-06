@@ -21,10 +21,10 @@ spark_installed_versions()
 sc <- spark_connect(master = "local")
 spark_web(sc)
 # Connect to Databbricks (not possbile with Community Edition)
-sc <- spark_connect(
+#sc <- spark_connect(
   cluster_id = "community.cloud.databricks.com",
   method = "databricks_connect"
-)
+#)
 
 # Setting the environment variables
 # https://localhost:9001/browser/templategenerator
