@@ -30,20 +30,30 @@ One-hot encode the cyl variable. You may find the ifelse function
 useful (Google it).
 
 ```{r}
-# your code here
+cars_cyl <- cars %>% 
+  mutate(cyl_4 = ifelse(cyl == 4, 1, 0),
+         cyl_6 = ifelse(cyl == 6, 1, 0),
+         cyl_8 = ifelse(cyl == 8, 1, 0))
+
+# Show the result
+cars_cyl %>%
+  select(cyl, cyl_4, cyl_6, cyl_8) %>%
+  head() %>%
+  collect()
 ```
 
 
 # Task 2
 
-Create an  OLS model that predicts the variable mpg using hp, wt and number
+Create an OLS model that predicts the variable mpg using hp, wt and number
 of cylinders as predictor variables. **Remember that categorical variables used as 
 predictors must be one-hot encoded! Also, don't fall into the dummy variable trap!** 
 Apply the tidy function from the broom package to the fitted model and display 
 the results in a table. What do the entries in the table mean? What is their interpretation?
 
 ```{r}
-# your code here
+cars_cyl %>%
+  
 ```
 
 # Task 3
