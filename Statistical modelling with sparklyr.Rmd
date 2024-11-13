@@ -52,8 +52,17 @@ Apply the tidy function from the broom package to the fitted model and display
 the results in a table. What do the entries in the table mean? What is their interpretation?
 
 ```{r}
-cars_cyl %>%
-  
+# Fit the OLS model without cyl_8 to avoid the dummy variable trap
+model <- cars_cyl %>%
+  ml_linear_regression(mpg ~ hp + wt + cyl_4 + cyl_6)
+
+# Apply the tidy function to the fitted model
+model_summary <- tidy(model)
+
+# Display the results in a table
+model_summary %>%
+  collect() %>%
+  kable()
 ```
 
 # Task 3
