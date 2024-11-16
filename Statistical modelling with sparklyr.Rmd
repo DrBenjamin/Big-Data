@@ -20,8 +20,8 @@ library(broom)
 Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
 
 ```{r warning = FALSE}
-sc = spark_connect(master = "local")
-cars = copy_to(sc, mtcars, overwrite = TRUE)
+sc <- spark_connect(master = "local")
+cars <- copy_to(sc, mtcars, overwrite = TRUE)
 ```
 
 # Task 1
@@ -52,12 +52,13 @@ Apply the tidy function from the broom package to the fitted model and display
 the results in a table. What do the entries in the table mean? What is their interpretation?
 
 ```{r}
-# Fit the OLS model without cyl_8 to avoid the dummy variable trap
-model <- cars_cyl %>%
-  ml_linear_regression(mpg ~ hp + wt + cyl_4 + cyl_6)
+# Fit the OLS model witho fit_intercept to prevent the dummy variable trap
+ols_model <- cars_cyl %>%
+  ml_linear_regression(mpg ~ hp + wt + cyl_4 + cyl_6 + cyl_8,
+                       fit_intercept = FALSE)
 
 # Apply the tidy function to the fitted model
-model_summary <- tidy(model)
+model_summary <- tidy(ols_model)
 
 # Display the results in a table
 model_summary %>%
@@ -78,7 +79,18 @@ fit a new OLS model with log(mpg) as the dependent variable. Display the
 results in a table.
 
 ```{r}
-# your code here
+cars_cyl <- cars_cyl %>%
+  mutate(ln_mpg = log(mpg))
+
+ols_model <- cars_cyl %>%
+  ml_linear_regression(ln_mpg ~ hp + wt + cyl_4 + cyl_6 + cyl_8,
+                       fit_intercept = FALSE)
+
+#ols_model <- tidy(ols_model)
+
+#ols_model %>%
+#  collect() %>%
+#  kable()
 ```
 
 
@@ -94,7 +106,19 @@ with all numbers rounded to 2 decimal places. You may find the paste and round f
 useful (Google them). Display the results in a table.
 
 ```{r}
-# your code here
+ols_model_ci <- tidy(ols_model) %>%
+  mutate(upper_ci = estimate + 1.96 * std.error,
+         lower_ci = estimate + 1.96 * std.error) %>%
+  mutate(ci = paste0(
+    round(estimate, 2),
+    " [", round(lower_ci, 2),
+    ", ", round(upper_ci, 2), "]"
+  )
+  )
+
+ols_model_ci %>%
+  collect() %>%
+  kable()
 ```
 
 
@@ -105,7 +129,11 @@ of interest are R^2, mean absolute error, mean squared error, and root mean
 squared error. Print these metrics out.
 
 ```{r}
-# your code here
+ols_model_metrics <- ml_evaluate(ols_model, cars_cyl)
+ols_model_metrics$r2
+ols_model_metrics$mean_absolute_error
+ols_model_metrics$mean_squared_error
+ols_model_metrics$root_mean_squared_error
 ```
 
 
@@ -114,6 +142,15 @@ squared error. Print these metrics out.
 Calculate the mean squared error for your model predictions "by hand". Remember to use dplyr functions only!
 
 ```{r}
-# your code here
+predictions <- ml_predict(ols_model, cars_cyl)
+predictions
+
+values <- mutate(predictions,
+  squared_error = (ln_mpg - prediction)^2
+) %>%
+  summarise(mse = mean(squared_error, na.rm = TRUE)) %>%
+  pull()
+
+identical(values, ols_model_metrics$mean_squared_error)
 ```
 
