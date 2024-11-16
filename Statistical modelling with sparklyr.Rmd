@@ -85,12 +85,6 @@ cars_cyl <- cars_cyl %>%
 ols_model <- cars_cyl %>%
   ml_linear_regression(ln_mpg ~ hp + wt + cyl_4 + cyl_6 + cyl_8,
                        fit_intercept = FALSE)
-
-#ols_model <- tidy(ols_model)
-
-#ols_model %>%
-#  collect() %>%
-#  kable()
 ```
 
 
