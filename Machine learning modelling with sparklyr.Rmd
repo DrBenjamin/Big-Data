@@ -15,13 +15,14 @@ library(dplyr)
 library(ggplot2)
 library(knitr)
 library(broom)
+library(knitr)
 ```
 
 Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
 
 ```{r warning = FALSE}
-sc = spark_connect(master = "local")
-cars = copy_to(sc, mtcars, overwrite = TRUE)
+sc <- spark_connect(master = "local")
+cars <- copy_to(sc, mtcars, overwrite = TRUE)
 ```
 
 
@@ -32,7 +33,22 @@ that relabels the gear variable so that it consists of numbers starting at 0. Yo
 may find the case_when function useful (Google it).
 
 ```{r}
-# your code here
+cars_cyl <- cars %>%
+  mutate(
+    cyl_4 = ifelse(cyl == 4, 1, 0),
+    cyl_6 = ifelse(cyl == 6, 1, 0),
+    cyl_8 = ifelse(cyl == 8, 1, 0)
+  ) %>%
+  mutate(gear_relabelled = gear - min(gear, na.rm = TRUE))
+
+cars_cyl %>%
+  select(gear_relabelled) %>%
+  pull() %>%
+  max()
+
+cars_cyl %>%
+  collect() %>%
+  kable()
 ```
 
 
@@ -47,7 +63,27 @@ Is there anything that was in the results table of the OLS model that is not
 present in the results table for this model?
 
 ```{r  warning = FALSE}
-# your code here
+mlr_model <- cars_cyl %>%
+  ml_logistic_regression(gear_relabelled ~ hp + cyl_4 + cyl_6 + cyl_8,
+                         fit_intercept = TRUE)
+
+mlr_model_tidy <- tidy(mlr_model)
+
+mlr_model_tidy %>%
+  collect() %>%
+  kable()
+
+ols_model <- cars_cyl %>%
+  ml_linear_regression(gear_relabelled ~ hp + cyl_4 + cyl_6 + cyl_8,
+                       fit_intercept = FALSE)
+
+# Apply the tidy function to the fitted model
+ols_model_tidy <- tidy(ols_model)
+
+# Display the results in a table
+ols_model_tidy %>%
+  collect() %>%
+  kable()
 ```
 
 
@@ -59,7 +95,55 @@ recall. Print these metrics out. Do you notice anything about the true positive
 rate and the recall?
 
 ```{r  warning = FALSE}
-# your code here
+# Get predictions from the model
+predictions <- ml_predict(mlr_model, cars_cyl)
+print(predictions)
+
+# Generate confusion matrix
+confusion_matrix <- predictions %>%
+  group_by(gear_relabelled, prediction) %>%
+  summarise(counts = n()) %>%
+  collect()
+print(confusion_matrix)
+
+# Calculate true positive rate
+rates <- confusion_matrix %>%
+  mutate(gear = prediction + 3) %>%
+  mutate(true = ifelse(gear_relabelled == prediction, counts, 0),
+         false = ifelse(gear_relabelled != prediction, counts, 0)
+  ) %>%
+  select(-prediction) %>%
+  group_by(gear) %>%
+  summarise(true_positiv_rate = sum(true) / sum(counts) * 100,
+            false_positiv_rate = sum(false) / sum(counts) * 100)
+rates %>%
+  collect() %>%
+  kable()
+
+# Calculate accuracy
+accuracy <- ml_multiclass_classification_evaluator(
+  predictions,
+  label_col = "gear_relabelled",
+  prediction_col = "prediction",
+  metric_name = "accuracy"
+)
+print(paste0("Accuracy: ", round(accuracy * 100, 2), "%"))
+
+precision <- ml_multiclass_classification_evaluator(
+  predictions,
+  label_col = "gear_relabelled",
+  prediction_col = "prediction",
+  metric_name = "weightedPrecision"
+)
+print(paste0("Precision: ", round(precision * 100, 2), "%"))
+
+recall <- ml_multiclass_classification_evaluator(
+  predictions,
+  label_col = "gear_relabelled",
+  prediction_col = "prediction",
+  metric_name = "weightedRecall"
+)
+print(paste0("Recall: ", round(recall * 100, 2), "%"))
 ```
 
 
@@ -70,7 +154,16 @@ vs as predictor variables, using ml_generalized_linear_regression.
 Apply the tidy function to the model, and display the result of doing this in a table.
 
 ```{r}
-# your code here
+# Binary dependents
+blr_model <-
+  ml_generalized_linear_regression(cars_cyl, family = "binomial", am ~ hp + vs)
+
+blr_model_tidy <- blr_model %>%
+  tidy()
+
+blr_model_tidy %>%
+  collect() %>%
+  kable()
 ```
 
 
@@ -87,7 +180,7 @@ that has the odds ratio, followed by a bracket with the 95% confidence interval,
 with all numbers rounded to 2 decimal places. Display the results in a table.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -96,7 +189,7 @@ with all numbers rounded to 2 decimal places. Display the results in a table.
 Access and print out the AIC value for the model.
 
 ```{r  warning = FALSE}
-# your code here
+
 ```
 
 
@@ -105,7 +198,7 @@ Access and print out the AIC value for the model.
 Create a new column that is the z-score of hp.
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -119,7 +212,7 @@ Make sure that continuous variables are normalised, and categorical variables
 are one-hot encoded.**
 
 ```{r}
-# your code here
+
 ```
 
 # Task 9
@@ -127,7 +220,7 @@ are one-hot encoded.**
 Use ml_evaluate to print out model metrics. Which metrics are available?
 
 ```{r}
-# your code here
+
 ```
 
 
@@ -138,5 +231,8 @@ using hp and number of cylinders as predictor variables. Calculate the C
 statistic using ml_binary_classification_evaluator.
 
 ```{r}
-# your code here
+ml_gradient_boosted_trees()
+ml_gbt_classifier()
+ml_gradient_boosted_trees(type = 'regression')
+ml_gbt_regressor()
 ```
