@@ -17,19 +17,25 @@ library(DBI)
 
 # Local Spark Cluster
 # Installation
-sparklyr::spark_install(version = "3.5.1")
+sparklyr::spark_install(version = "3.5.0")
 spark_installed_versions()
 spark_install_find(
   installed_only = TRUE
 )
+spark_available_versions()
+spark_available_versions(show_minor = TRUE)
 
+# Deinstallation Spark version 2.4.8
+spark_uninstall("2.4.8", "2.7")
+# Deinstallation Spark version 3.0.3
+spark_uninstall("3.0.3", "3.2")
 # Deinstallation Spark version 3.4.2
-spark_uninstall("3.4.2", "3")
-# Deinstallation Spark version 3.5.0
+spark_uninstall("3.4.1", "3")
+# Deinstallation Spark version 3.5.1
 spark_uninstall("3.5.0", "3")
 
 # Creation of local cluster
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "3.2.1")
 spark_web(sc)
 
 # Connect to Databbricks (not possbile with Community Edition)
@@ -63,7 +69,7 @@ dbGetQuery(sc, "SELECT count(*) FROM iris")
 ## Spark connection to MinIO
 ## Version 1
 # Establish Spark connection
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "3.2.1")
 
 # Getting spark context
 ctx <- sparklyr::spark_context(sc)
@@ -94,33 +100,40 @@ set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
 
 # Set AWS credentials and endpoint for MinIO
 Sys.setenv(
-  AWS_ACCESS_KEY_ID = "health",
-  AWS_SECRET_ACCESS_KEY = "NOentry#23",
-  AWS_SSL_ENABLED = "TRUE",
+  AWS_ACCESS_KEY = "health",
+  AWS_SECRET_KEY = "NOentry#23",
+  AWS_SSL_ENABLED = "FALSE",
   AWS_S3_ENDPOINT = "127.0.0.1:9000")
 
 # Define Spark configuration and include necessary Hadoop and AWS packages
 config <- spark_config()
 config$sparklyr.defaultPackages <- c(
-  "org.apache.hadoop:hadoop-aws:3.4.1",
-  "com.amazonaws:aws-java-sdk-bundle:1.12.778"
+  "org.apache.hadoop:hadoop-aws:3.3.1",
+  "com.amazonaws:aws-java-sdk-core:1.12.150"
 )
 
 # Include additional Hadoop configurations for S3A
 config[["spark.hadoop.fs.s3a.endpoint"]] <- "127.0.0.1:9000"
 config[["spark.hadoop.fs.s3a.access.key"]] <- "health"
 config[["spark.hadoop.fs.s3a.secret.key"]] <- "NOentry#23"
-config[["spark.hadoop.fs.s3a.connection.ssl.enabled"]] <- "true"
+config[["spark.hadoop.fs.s3a.connection.ssl.enabled"]] <- "false"
 config[["spark.hadoop.fs.s3a.path.style.access"]] <- "true"
+config[["spark.hadoop.fs.s3a.aws.credentials.provider"]] <- "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
 
 # Establish Spark connection with the configuration
-sc <- spark_connect(master = "local", config = config)
+sc <- spark_connect(master = "local", version = "3.2.1", config = config)
 
 # Read the CSV file from MinIO
 iris <- spark_read_csv(sc, path = "s3a://templategenerator/iris.csv")
-
-# Display the schema of the loaded DataFrame
 print(iris)
+
+# Reading a CSV file from MinIO
+options <- spark_read_csv(sc, path = "s3a://templategenerator/options.csv")
+print(options)
+
+# Reading a CSV file from MinIO
+presets <- spark_read_csv(sc, path = "s3a://templategenerator/presets.csv")
+print(presets)
 
 # Disconnect
 spark_disconnect(sc)

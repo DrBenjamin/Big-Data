@@ -23,7 +23,7 @@ library(aws.s3)
 Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
 
 ```{r warning = FALSE}
-sc <- spark_connect(master = "local")
+sc <- spark_connect(master = "local", version = "3.5.0")
 cars <- copy_to(sc, mtcars, overwrite = TRUE)
 ```
 
