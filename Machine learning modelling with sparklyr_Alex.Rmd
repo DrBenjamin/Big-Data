@@ -1,0 +1,185 @@
+---
+title: "Machine learning modelling with sparklyr"
+output: pdf_document
+---
+
+In this exercise, we will be exploring some machine learning models with sparklyr.
+
+Load up the required packages.
+
+```{r warning=FALSE, message=FALSE}
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(broom)
+```
+
+Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
+
+```{r warning = FALSE}
+sc = spark_connect(master = "local")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+
+# Task 1
+
+One-hot encode the variable cyl, and create a new column called gear_relabelled,
+that relabels the gear variable so that it consists of numbers starting at 0. You
+may find the case_when function useful (Google it).
+
+```{r}
+# your code here
+cars_df <- cars %>% 
+  mutate(cyl_4 = ifelse(cyl == 4, 1, 0),
+         cyl_6 = ifelse(cyl == 6, 1, 0),
+         cyl_8 = ifelse(cyl == 8, 1, 0),
+         gear_relabelled = case_when(gear == 3 ~ 0, gear == 4 ~ 1, gear == 5 ~ 2))
+head(cars_df, 3) %>% print()
+```
+
+
+# Task 2
+
+Create a multinomial logistic regression model that predicts the number of gears,
+using hp and number of cylinders as predictor variables. **Remember to not fall
+into the dummy variable trap!** 
+Apply the tidy function to the model, and display the result of doing this 
+in a table. What do the entries in the table mean? What is their interpretation?
+Is there anything that was in the results table of the OLS model that is not
+present in the results table for this model?
+
+```{r  warning = FALSE}
+# your code here
+lr_model <- ml_logistic_regression(cars_df, gear_relabelled ~ hp + cyl_6 + cyl_8)
+tidy(lr_model) %>% print()
+
+ml_predict(lr_model, cars_df)
+```
+No standard deviations and p-values reported as seen in OLS (Ordinary least square).
+
+
+# Task 3
+
+Evaluate the multinomial logistic regression model. The main metrics that are
+of interest are true positive rate, false positive rate, accuracy, precision and
+recall. Print these metrics out. Do you notice anything about the true positive 
+rate and the recall?
+
+```{r  warning = FALSE}
+# your code here
+evaluation_result <- ml_evaluate(lr_model, cars_df)
+tpr <- evaluation_result$true_positive_rate_by_label()
+fpr <- evaluation_result$false_positive_rate_by_label()
+accuracy <- evaluation_result$accuracy()
+precision <- evaluation_result$precision_by_label()
+recall <- evaluation_result$recall_by_label()
+```
+Question: why doesn't it evaluate the tnr/specificty
+
+
+# Task 4
+
+Create a binary logistic regression model that predicts the variable am with hp and
+vs as predictor variables, using ml_generalized_linear_regression. 
+Apply the tidy function to the model, and display the result of doing this in a table.
+
+```{r}
+# your code here
+lr_model_binomial <- ml_generalized_linear_regression(cars_df, am ~ hp + vs, family = "binomial")
+tidy(lr_model_binomial) %>% print()
+```
+
+
+# Task 5
+
+Recall that the odds ratio from a logistic regression model is given by the
+exponential of a fitted coefficient. The 95% confidence interval for the odds ratio
+is given by the exponential of the upper and lower limits of the 95% confidence
+interval for the fitted coefficient.
+
+In the results table, create three new columns for the odds ratio, and the upper
+and lower limits of its 95% confidence interval. Then create a column
+that has the odds ratio, followed by a bracket with the 95% confidence interval, 
+with all numbers rounded to 2 decimal places. Display the results in a table.
+
+```{r}
+# your code here
+tidy(lr_model_binomial) %>% 
+  mutate(odds_ratio = exp(estimate),
+         lower_CI = exp(estimate - 1.96 * std.error),
+         upper_CI = exp(estimate + 1.96 * std.error),
+         odds_ratio_CI = sprintf("%.2f (%.2f, %.2f)", odds_ratio, lower_CI, upper_CI)) %>% 
+  print()
+```
+
+
+# Task 6
+
+Access and print out the AIC value for the model.
+
+```{r  warning = FALSE}
+# your code here
+lr_binomial_evaluate <- ml_evaluate(lr_model_binomial, cars_df)
+lr_binomial_evaluate$aic()
+```
+
+
+# Task 7
+
+Create a new column that is the z-score of hp.
+
+```{r}
+# your code here
+cars_df <- cars_df %>% 
+  mutate(z_hp = (hp - mean(hp, na.rm = T)) / sd(hp, na.rm = T))
+  head(cars_df, 3) %>% print()
+```
+
+
+# Task 8
+
+Create a multilayer perceptron classifier that predicts the variable gear, 
+using hp and number of cylinders as predictor variables. Extract predictions
+from the model, and show the first few rows of predictions in a table. 
+**Make sure that the number of neurons in the input and output layers are correct.
+Make sure that continuous variables are normalised, and categorical variables
+are one-hot encoded.**
+
+```{r}
+# your code here
+mlp_model <- ml_multilayer_perceptron_classifier(cars_df,
+                                                 gear_relabelled ~ z_hp + cyl_6 + cyl_8,
+                                                 layers = c(3,7,7,3))
+mlp_predict <- ml_predict(mlp_model, cars_df)
+head(mlp_predict) %>% print()
+```
+
+# Task 9
+
+Use ml_evaluate to print out model metrics. Which metrics are available?
+
+```{r}
+# your code here
+ml_evaluate(mlp_model, cars_df) %>%  print()
+```
+Just accuracy.
+Why doesn't it show other metrics as seen in the logistics regression model? 
+
+
+# Task 10
+
+Create a gradient boosted tree classifier that predicts the variable am, 
+using hp and number of cylinders as predictor variables. Calculate the C
+statistic using ml_binary_classification_evaluator.
+
+```{r}
+# your code here
+gbt_model <- ml_gradient_boosted_trees(cars_df, am ~ hp + cyl, type = 'classification')
+
+predict_gbt <- ml_predict(gbt_model, cars_df)
+ml_binary_classification_evaluator(predict_gbt, metric_name = "areaUnderROC")
+```
+
+Area under the curve is equal to C statistics with a score of 0.995. This means the model is doing extremely well in distinguishing between the positive and negative class from the predictions
