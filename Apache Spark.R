@@ -61,6 +61,7 @@ dbGetQuery(sc, "SELECT count(*) FROM iris")
 
 
 ## Spark connection to MinIO
+## Version 1
 # Establish Spark connection
 sc <- spark_connect(master = "local")
 
@@ -87,6 +88,7 @@ iris <- spark_read_csv(sc,
                        name = "iris",
                        path = "s3a://templategenerator/iris.csv")
 
+## Version 2
 # Set SSL configurations if necessary
 set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
 

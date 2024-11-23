@@ -235,10 +235,11 @@ Create a new column that is the z-score of hp.
 
 ```{r}
 ## Live session solution
-cars_cyl <- cars_cyl %>% 
+cars_cyl <- cars_cyl %>%
   mutate(z_hp = (hp - mean(hp, na.rm = TRUE)) / sd(hp, na.rm = TRUE))
-  head(cars_df, 3) %>% 
-    print()
+
+head(cars_cyl, 10) %>%
+  print()
 ```
 
 
@@ -255,9 +256,13 @@ are one-hot encoded.**
 ## Live session solution
 mlp_model <- ml_multilayer_perceptron_classifier(cars_cyl,
                                                  gear_relabelled ~ z_hp + cyl_6 + cyl_8,
-                                                 layers = c(3, 7, 7, 3)
+                                                 # 1. input layer: nodes is number of predictors
+                                                 # 2. hidden layer: nodes of perceptron
+                                                 # 3. hidden layer: nodes of perceptron
+                                                 # 4. output layer: number of categories of gear_relabelled
+                                                 layers = c(3, 8, 8, 3)
                                                 )
-mlp_predict <- ml_predict(mlp_model, cars_df)
+mlp_predict <- ml_predict(mlp_model, cars_cyl)
 head(mlp_predict) %>% 
   print()
 ```
