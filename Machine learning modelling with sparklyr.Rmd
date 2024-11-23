@@ -10,12 +10,14 @@ In this exercise, we will be exploring some machine learning models with sparkly
 Load up the required packages.
 
 ```{r warning=FALSE, message=FALSE}
+# Load required libraries
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
 library(broom)
-library(knitr)
+library(httr)
+library(aws.s3)
 ```
 
 Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
@@ -33,6 +35,7 @@ that relabels the gear variable so that it consists of numbers starting at 0. Yo
 may find the case_when function useful (Google it).
 
 ```{r}
+## My solution
 cars_cyl <- cars %>%
   mutate(
     cyl_4 = ifelse(cyl == 4, 1, 0),
@@ -63,9 +66,9 @@ Is there anything that was in the results table of the OLS model that is not
 present in the results table for this model?
 
 ```{r  warning = FALSE}
+## My solution
 mlr_model <- cars_cyl %>%
-  ml_logistic_regression(gear_relabelled ~ hp + cyl_4 + cyl_6 + cyl_8,
-                         fit_intercept = TRUE)
+  ml_logistic_regression(gear_relabelled ~ hp + cyl_6 + cyl_8)
 
 mlr_model_tidy <- tidy(mlr_model)
 
@@ -85,7 +88,7 @@ ols_model_tidy %>%
   collect() %>%
   kable()
 ```
-
+**Results:** No standard deviations and p-values reported as seen in OLS (Ordinary least square).
 
 # Task 3
 
@@ -94,7 +97,29 @@ of interest are true positive rate, false positive rate, accuracy, precision and
 recall. Print these metrics out. Do you notice anything about the true positive 
 rate and the recall?
 
+```{r warning = FALSE}
+## Live session solution
+evaluation_result <- ml_evaluate(lr_model, cars_df)
+
+# Positive rates
+tpr <- evaluation_result$true_positive_rate_by_label()
+print(paste0("True positive rate: ", round(tpr * 100, 2), "%"))
+fpr <- evaluation_result$false_positive_rate_by_label()
+print(paste0("False positive rate: ", round(tpr * 100, 2), "%"))
+
+# Other metrics
+accuracy <- evaluation_result$accuracy()
+print(paste0("Accuracy: ", round(accuracy * 100, 2), "%"))
+
+precision <- evaluation_result$precision_by_label()
+print(paste0("Precision: ", round(precision * 100, 2), "%"))
+
+recall <- evaluation_result$recall_by_label()
+print(paste0("Recall: ", round(recall * 100, 2), "%"))
+```
+
 ```{r  warning = FALSE}
+## My solution, gets some different results, but mostly nearby
 # Get predictions from the model
 predictions <- ml_predict(mlr_model, cars_cyl)
 print(predictions)
@@ -146,6 +171,7 @@ recall <- ml_multiclass_classification_evaluator(
 print(paste0("Recall: ", round(recall * 100, 2), "%"))
 ```
 
+**Question:** Why doesn't it evaluate the tnr/specificty
 
 # Task 4
 
@@ -154,6 +180,7 @@ vs as predictor variables, using ml_generalized_linear_regression.
 Apply the tidy function to the model, and display the result of doing this in a table.
 
 ```{r}
+## My solution
 # Binary dependents
 blr_model <-
   ml_generalized_linear_regression(cars_cyl, family = "binomial", am ~ hp + vs)
@@ -180,7 +207,13 @@ that has the odds ratio, followed by a bracket with the 95% confidence interval,
 with all numbers rounded to 2 decimal places. Display the results in a table.
 
 ```{r}
-
+## Live session solution
+blr_model_tidy %>%
+  mutate(odds_ratio = exp(estimate),
+         lower_CI = exp(estimate - 1.96 * std.error),
+         upper_CI = exp(estimate + 1.96 * std.error),
+         odds_ratio_CI = sprintf("%.2f (%.2f, %.2f)", odds_ratio, lower_CI, upper_CI)) %>% 
+  print()
 ```
 
 
@@ -189,16 +222,23 @@ with all numbers rounded to 2 decimal places. Display the results in a table.
 Access and print out the AIC value for the model.
 
 ```{r  warning = FALSE}
-
+## Live session solution
+blr_evaluate <- ml_evaluate(blr_model, cars_cyl)
+blr_evaluate$aic()
 ```
 
+Akaike Information Criterion measures is used in statistical modeling to compare different models and select the best one. The AIC provides a means for model selection by balancing the goodness of fit of the model and the complexity of the model.
 
 # Task 7
 
 Create a new column that is the z-score of hp.
 
 ```{r}
-
+## Live session solution
+cars_cyl <- cars_cyl %>% 
+  mutate(z_hp = (hp - mean(hp, na.rm = TRUE)) / sd(hp, na.rm = TRUE))
+  head(cars_df, 3) %>% 
+    print()
 ```
 
 
@@ -212,7 +252,14 @@ Make sure that continuous variables are normalised, and categorical variables
 are one-hot encoded.**
 
 ```{r}
-
+## Live session solution
+mlp_model <- ml_multilayer_perceptron_classifier(cars_cyl,
+                                                 gear_relabelled ~ z_hp + cyl_6 + cyl_8,
+                                                 layers = c(3, 7, 7, 3)
+                                                )
+mlp_predict <- ml_predict(mlp_model, cars_df)
+head(mlp_predict) %>% 
+  print()
 ```
 
 # Task 9
@@ -220,7 +267,9 @@ are one-hot encoded.**
 Use ml_evaluate to print out model metrics. Which metrics are available?
 
 ```{r}
-
+## Live session solution
+ml_evaluate(mlp_model, cars_cyl) %>%
+  print()
 ```
 
 
@@ -231,8 +280,10 @@ using hp and number of cylinders as predictor variables. Calculate the C
 statistic using ml_binary_classification_evaluator.
 
 ```{r}
-ml_gradient_boosted_trees()
-ml_gbt_classifier()
-ml_gradient_boosted_trees(type = 'regression')
-ml_gbt_regressor()
+## Live session solution
+gbt_model <- ml_gradient_boosted_trees(cars_cyl, am ~ hp + cyl, 
+                                       type = 'classification')
+
+predict_gbt <- ml_predict(gbt_model, cars_cyl)
+ml_binary_classification_evaluator(predict_gbt, metric_name = "areaUnderROC")
 ```

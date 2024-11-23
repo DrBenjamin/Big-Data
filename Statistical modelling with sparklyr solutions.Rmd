@@ -1,0 +1,135 @@
+---
+title: "Statistical modelling with sparklyr"
+output: pdf_document
+---
+
+In this exercise, we will be exploring some statistical models with sparklyr.
+
+Load up the required packages.
+
+```{r warning=FALSE, message=FALSE}
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(broom)
+```
+
+Create a spark connection that treats your local machine as a cluster. Load up the built-in R dataset mtcars into a Spark dataframe.
+
+```{r warning = FALSE}
+sc = spark_connect(master = "local")
+cars = copy_to(sc, mtcars, overwrite = TRUE)
+```
+
+\textcolor{red}{NOTE THAT WHILE IT MAY BE OK TO USE copy\_to WHEN LEARNING, IN YOUR FINAL ASSIGNMENT YOU SHOULD NOT USE IT. THIS IS BECAUSE IN A REAL APPLICATION, YOU WILL NOT BE ABLE TO STORE THE DATA IN A NORMAL R DATAFRAME AND THEN COPY IT OVER! USE spark\_read\_csv! IF YOU DO NOT DO THIS, YOU WILL LOSE MARKS!}
+
+# Task 1
+
+One-hot encode the cyl variable. You may find the ifelse function
+useful (Google it).
+
+```{r}
+cars = mutate(cars,
+  cyl_4 = ifelse(cyl == 4, 1, 0),
+  cyl_6 = ifelse(cyl == 6, 1, 0),
+  cyl_8 = ifelse(cyl == 8, 1, 0)
+)
+```
+
+
+# Task 2
+
+Create an  OLS model that predicts the variable mpg using hp, wt and number
+of cylinders as predictor variables. **Remember that categorical variables used as 
+predictors must be one-hot encoded! Also, don't fall into the dummy variable trap!** 
+Apply the tidy function from the broom package to the fitted model and display 
+the results in a table. What do the entries in the table mean? What is their interpretation?
+
+```{r}
+ols_model = ml_linear_regression(cars, mpg ~ hp + wt + cyl_4 + cyl_6 + cyl_8, fit_intercept = FALSE)
+# Also acceptable would be to fit an intercept, but only include two of: cyl_4, cyl_6, cyl_8
+
+ols_results = tidy(ols_model)
+
+kable(ols_results)
+```
+
+# Task 3
+
+The variable mpg **must** be positive. The exponential function has the property 
+that it is always positive for any real value of its argument. We can take advantage
+of this to create an OLS model where the dependent variable can never be negative,
+regardless of the value of the coefficients or independent variables. This is 
+done by replacing mpg with its logarithm in the model.
+
+Create a new column in the Spark dataframe that is the logarithm of mpg. Then
+fit a new OLS model with log(mpg) as the dependent variable. Display the
+results in a table.
+
+```{r}
+cars = mutate(cars, ln_mpg = log(mpg))
+
+ols_model = ml_linear_regression(cars, ln_mpg ~ hp + wt + cyl_4 + cyl_6 + cyl_8, fit_intercept = FALSE)
+
+ols_results = tidy(ols_model)
+
+kable(ols_results)
+```
+
+
+# Task 4
+
+Recall that the upper/lower 95% confidence interval for fitted coefficients 
+in a regression are given by adding/subtracting 1.96 standard deviations.
+
+In the results table, create two new columns for the upper and lower limits
+of the 95% confidence interval. Then create a column
+that has the estimated coefficient, followed by a bracket with the 95% confidence interval, 
+with all numbers rounded to 2 decimal places. You may find the paste and round functions
+useful (Google them). Display the results in a table.
+
+```{r}
+ols_results =
+  mutate(ols_results,
+    lower_confidence = estimate - 1.96 * std.error,
+    upper_confidence = estimate + 1.96 * std.error
+  ) %>%
+  mutate(
+    estimate_CI = paste0(round(estimate, 2), " (", round(lower_confidence, 2), ", ", round(upper_confidence, 2), ")")
+  )
+
+kable(ols_results)
+```
+
+
+# Task 5
+
+Evaluate the OLS model with ln(mpg) as the dependent variable using the ml_evaluate function. The main metrics that are
+of interest are R^2, mean absolute error, mean squared error, and root mean 
+squared error. Print these metrics out.
+
+```{r}
+ols_model_metrics = ml_evaluate(ols_model, cars)
+
+ols_model_metrics$r2
+ols_model_metrics$mean_absolute_error
+ols_model_metrics$mean_squared_error
+ols_model_metrics$root_mean_squared_error
+```
+
+
+# Task 6
+
+Calculate the mean squared error for your model predictions "by hand". Remember to use dplyr functions only!
+
+```{r}
+predictions = ml_predict(ols_model)
+
+mutate(predictions,
+  squared_error = (ln_mpg - prediction)^2
+) %>%
+  summarise(mse = mean(squared_error, na.rm = TRUE)) %>%
+  pull()
+```
+
