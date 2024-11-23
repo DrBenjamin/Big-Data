@@ -1,0 +1,9 @@
+OPTION,DEFAULT
+'Kunde','Test Kunde'
+'Webscraper','True'
+'WebUrl','https://www.gwq-serviceplus.de/ueber-uns'
+'Cloud','2'
+'OpenAI','False'
+'LLMUrl','http://localhost'
+'LLMPort','1234'
+'System','Du erstellst einzelne Absätze einer Anzeige beim Bundesamt für Soziale Sicherung über die Verarbeitung von Sozialdaten im Auftrag (AVV) nach § 80 Zehntes Sozialgesetzbuch (SGB X). Tausche die Platzhalter (z.B. <Kunde>) durch die entsprechenden Inhalte aus und gebe nur den verbesserten Text in einer sachlichen und formellen Form aus und verzichte auf Phrasen wie z.B. `Vielen Dank für die Informationen. Hier sind die angepassten Absätze für die Anzeige beim Bundesamt für Soziale Sicherung:`.'

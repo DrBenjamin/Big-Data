@@ -135,5 +135,17 @@ print(options)
 presets <- spark_read_csv(sc, path = "s3a://templategenerator/presets.csv")
 print(presets)
 
+# Creating a test data frame from csv file
+test_df <- read.csv("test.csv", header = TRUE)
+
+# Copy the data frame to Spark
+test_spark_df <- copy_to(sc, test_df, overwrite = TRUE)
+
+# Write the Spark DataFrame to MinIO
+spark_write_csv(test_spark_df,
+                name = "test.csv",
+                path = "s3a://templategenerator/test.csv",
+                mode = "overwrite")
+
 # Disconnect
 spark_disconnect(sc)
