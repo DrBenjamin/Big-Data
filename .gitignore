@@ -63,3 +63,4 @@ sbt.json
 .bloop/*
 derby.log
 metastore_db/*
+tmp/*

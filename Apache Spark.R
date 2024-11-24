@@ -14,6 +14,8 @@ library(tidyverse)
 library(dplyr)
 library(readr)
 library(DBI)
+library(knitr)
+library(fs)
 
 # Local Spark Cluster
 # Installation
@@ -67,43 +69,15 @@ dbGetQuery(sc, "SELECT count(*) FROM iris")
 
 
 ## Spark connection to MinIO
-## Version 1
-# Establish Spark connection
-sc <- spark_connect(master = "local", version = "3.2.1")
-
-# Getting spark context
-ctx <- sparklyr::spark_context(sc)
-
-# Using below to set the java spark context
-jsc <- invoke_static(sc,
-                     "org.apache.spark.api.java.JavaSparkContext",
-                     "fromSparkContext",
-                     ctx)
-
-# Setting the s3 configs:
-hconf <- jsc %>%
-  invoke("hadoopConfiguration")
-
-hconf %>%
-  invoke("set", "fs.s3a.access.key", "health")
-
-hconf %>%
-  invoke("set", "fs.s3a.secret.key", "NOentry#23")
-
-iris <- spark_read_csv(sc,
-                       name = "iris",
-                       path = "s3a://templategenerator/iris.csv")
-
-## Version 2
 # Set SSL configurations if necessary
 #set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
 
 # Set AWS credentials and endpoint for MinIO
 Sys.setenv(
-  AWS_ACCESS_KEY = "health",
-  AWS_SECRET_KEY = "NOentry#23",
-  AWS_SSL_ENABLED = "FALSE",
-  AWS_S3_ENDPOINT = "127.0.0.1:9000")
+           AWS_ACCESS_KEY = "health",
+           AWS_SECRET_KEY = "NOentry#23",
+           AWS_SSL_ENABLED = "FALSE",
+           AWS_S3_ENDPOINT = "127.0.0.1:9000")
 
 # Define Spark configuration and include necessary Hadoop and AWS packages
 config <- spark_config()
@@ -137,15 +111,28 @@ print(presets)
 
 # Creating a test data frame from csv file
 test_df <- read.csv("test.csv", header = TRUE)
+kable(test_df)
 
 # Copy the data frame to Spark
 test_spark_df <- copy_to(sc, test_df, overwrite = TRUE)
 
 # Write the Spark DataFrame to MinIO
 spark_write_csv(test_spark_df,
-                name = "test.csv",
-                path = "s3a://templategenerator/test.csv",
+                name = "test",
+                memory = TRUE,
+                path = "s3a://templategenerator/test",
                 mode = "overwrite")
+
+# Load the table into Spark memory
+tbl_cache(sc, "test_df")
+cached_df <- tbl(sc, "test_df")
+
+# Run SQL queries
+result <- dbGetQuery(sc, "SELECT * FROM test_df LIMIT 5")
+print(result)
+
+# Remove variable `cached_df` from global environment
+rm(cached_df)
 
 # Disconnect
 spark_disconnect(sc)
