@@ -96,7 +96,7 @@ iris <- spark_read_csv(sc,
 
 ## Version 2
 # Set SSL configurations if necessary
-set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
+#set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
 
 # Set AWS credentials and endpoint for MinIO
 Sys.setenv(
