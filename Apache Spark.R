@@ -9,7 +9,9 @@ library(devtools)
 library(httr)
 install_github("nagdevAmruthnath/minio.s3")
 library("minio.s3")
+install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
 library(aws.s3)
+install.packages("tidyverse")
 library(tidyverse)
 library(dplyr)
 library(readr)
@@ -19,7 +21,7 @@ library(fs)
 
 # Local Spark Cluster
 # Installation
-sparklyr::spark_install(version = "3.5.0")
+sparklyr::spark_install(version = "3.5.1")
 spark_installed_versions()
 spark_install_find(
   installed_only = TRUE
@@ -37,7 +39,7 @@ spark_uninstall("3.4.1", "3")
 spark_uninstall("3.5.0", "3")
 
 # Creation of local cluster
-sc <- spark_connect(master = "local", version = "3.2.1")
+sc <- spark_connect(master = "local", version = "3.5.1")
 spark_web(sc)
 
 # Connect to Databbricks (not possbile with Community Edition)
@@ -49,6 +51,10 @@ spark_web(sc)
 # Setting the environment variables
 # https://localhost:9001/browser/templategenerator
 set_config(config(ssl_verifyhost = 0L, ssl_verifypeer = 0L))
+
+# Get environment variables
+Sys.getenv("JAVA_HOME")
+
 Sys.setenv("AWS_ACCESS_KEY_ID" = "health",
            "AWS_SECRET_ACCESS_KEY" = "NOentry#23",
            "AWS_SSL_ENABLED" = "TRUE",
@@ -118,9 +124,9 @@ test_spark_df <- copy_to(sc, test_df, overwrite = TRUE)
 
 # Write the Spark DataFrame to MinIO
 spark_write_csv(test_spark_df,
-                name = "test",
+                name = "test2",
                 memory = TRUE,
-                path = "s3a://templategenerator/test",
+                path = "s3a://templategenerator/test2",
                 mode = "overwrite")
 
 # Load the table into Spark memory

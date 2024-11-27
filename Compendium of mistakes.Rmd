@@ -14,7 +14,7 @@ An important challenge is to understand why some of the code snippets below are 
 
 # Task 1
 
-```{r}
+```{r message = FALSE}
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
@@ -26,28 +26,33 @@ library(kableExtra)
 # Task 2
 
 ```{r warning = FALSE}
-sc = spark_connect(master = "local")
-cars = copy_to(sc, mtcars, overwrite = TRUE)
+sc = spark_connect(master = "local", version = "3.5.1")
+# Copying big data to Spark will fail
+cars <- copy_to(sc, mtcars, overwrite = TRUE)
 ```
 
 # Task 3
 
 ```{r}
-cars %>% 
+# Collecting the whole big data dataset into the local R session will fail
+cars %>%
   collect()
 ```
 
 # Task 4
 
 ```{r}
-cars %>% 
-  summary()
+# The summary() function is not compatible with Spark DataFrames directly as it is a R function
+cars %>%
+  summary() # delete()
+  #sdf_summary()
 ```
 
 # Task 5
 
 ```{r}
-cars %>% 
+# Format issues with overlapping output in the pdf document, round numbers
+cars %>%
   sdf_describe() %>%
   kable()
 ```
@@ -55,8 +60,8 @@ cars %>%
 # Task 6
 
 ```{r}
-cars = mutate(cars,
-  # one-hot encoding of cyl
+cars <- mutate(cars,
+  # One-hot encoding of cyl
   cyl_4 = ifelse(cyl == 4, 1, 0),
   cyl_6 = ifelse(cyl == 6, 1, 0),
   cyl_8 = ifelse(cyl == 8, 1, 0),
@@ -69,69 +74,86 @@ cars = mutate(cars,
 )
 
 cars %>%
-	summarise(mean_gear_relabelled = mean(gear_relabelled, na.rm = TRUE))
+  summarise(mean_gear_relabelled = mean(gear_relabelled, na.rm = TRUE)) # doesn't make sense to mean 
 ```
 
 # Task 7
 
 ```{r}
+# Collecting the whole column to the local R environment will fail
 cars %>%
-	pull(mpg) %>%
+  pull(mpg) %>%
   mean()
+
+# Use this code instead
+cars %>%
+  summarise(mean_mpg = mean(mpg, na.rm = TRUE)) %>%
+  collect()
 ```
 
 # Task 8
 
 ```{r}
-mn_model = ml_logistic_regression(cars,
-  am ~ hp + cyl_6 + cyl_8)
+mn_model <- ml_logistic_regression(cars,
+                                   am ~ hp + cyl_6 + cyl_8)
 
-predictions = ml_predict(mn_model)
+predictions <- ml_predict(mn_model)
+print(predictions)
 
-pred = predictions %>% 
+# Spark dataframe to R dataframe conversion, as many predictions as rows (too big!), do some aggregation
+pred <- predictions %>%
   select(am, probability_1) %>%
+  #summarise(mean_probability_1 = mean(probability_1)) %>%
   collect()
+class(pred)
 
+# Never push a Spark dataframe to ggplot2
 pred %>%
   ggplot(aes(as.factor(am), probability_1)) +
   geom_boxplot()
 ```
+
 ```{r}
-mn_model = ml_logistic_regression(cars, gear_relabelled ~ hp + wt + mpg + drat + qsec + disp + vs + cyl_6 + cyl_8)
+# Formatting issue 
+mn_model <- ml_logistic_regression(cars,
+                                   gear_relabelled ~ hp + wt + mpg + drat + qsec + disp + vs + cyl_6 + cyl_8)
 ```
 
 # Task 9
 
 ```{r}
-cars2 = cars %>%
-  select(mpg, cyl)
+# Creating sub-tables of the big data dataset won't make sense without a specific purpose
+cars2 <- cars %>%
+  select(mpg, cyl) 
 
-cars3 = cars %>%
-  select(mpg, drat, wt)
+cars3 <- cars %>%
+  select(mpg, drat, wt) 
 
-cars4 = cars %>%
-  select(mpg, cyl, carb, hp)
+cars4 <- cars %>%
+  select(mpg, cyl, carb, hp) 
 
-cars5 = cars %>%
-  select(hp, drat, wt)
+cars5 <- cars %>%
+  select(hp, drat, wt) 
 ```
 
 # Task 10
 
 ```{r}
-ggplot(cars, aes(cyl)) + 
+# GGplot2 will freeze with Spark DataFrames directly (too big!)
+ggplot(cars, aes(cyl)) +
   geom_bar()
 
-ggplot(cars, aes(mpg)) + 
+ggplot(cars, aes(mpg)) +
   geom_boxplot()
 
-ggplot(cars, aes(mpg)) + 
+ggplot(cars, aes(mpg)) +
   geom_histogram()
 ```
 
 # Task 11
 
 ```{r}
+# Performing a listwise deletion of missing values in the local R environment not possbile with Spark DataFrames!
 na.omit(cars)
 ```
 
@@ -140,7 +162,8 @@ na.omit(cars)
 ```{r}
 #install.packages("corrr")
 library(corrr)
-
 correlate(cars)
-```
 
+# Use this code instead
+ml_corr(cars)
+```
